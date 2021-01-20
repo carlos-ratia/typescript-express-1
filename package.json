@@ -1,0 +1,27 @@
+{
+  "name": "typescript-express-1",
+  "version": "1.0.0",
+  "description": "Node + ExpressJs + Typescript",
+  "main": "index.js",
+  "scripts": {
+    "build:ts": "tsc",
+    "watch:build": "tsc -w",
+    "watch": "nodemon src/a.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/carlos-ratia/typescript-express-1.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/carlos-ratia/typescript-express-1/issues"
+  },
+  "homepage": "https://github.com/carlos-ratia/typescript-express-1#readme",
+  "devDependencies": {
+    "nodemon": "^2.0.7",
+    "ts-node": "^9.1.1",
+    "typescript": "^4.1.3"
+  }
+}
