@@ -1,13 +1,41 @@
-import express, { Application, NextFunction, Request, Response } from 'express';
-import createHttpError from 'http-errors';
-import bodyParser from 'body-parser';
-import cors from 'cors';
-import helmet from 'helmet';
+import express, { Application, NextFunction, Request, Response } from "express";
+import createHttpError from "http-errors";
+import compression from "compression";
+import cors from "cors";
+import bodyParser from "body-parser";
+import helmet from "helmet";
+import _ from "lodash";
+
+import dotenv from "dotenv";
+
+//
+const result = dotenv.config();
+
+if (result.error) {
+  throw result.error;
+}
+
+_.forIn(
+  {
+    PORT: process.env.PORT,
+  },
+  (value: string | null | undefined, key: any) => {
+    if (value === undefined || value === null || value === "") {
+      console.error(`The ${key} is no define in the .env`);
+      process.exit(1);
+    }
+  }
+);
 
 //npm install express
 //npm install -D @types/express
 const app: Application = express();
-const port: number = 5000;
+const port: number = parseInt(process.env.PORT ?? "5000");
+
+// npm install compression
+// npm install -D @types/compression
+// https://github.com/expressjs/compression#readme
+app.use(compression());
 
 //npm install body-parse
 //npm install -D @types/body-parse
@@ -22,62 +50,55 @@ const port: number = 5000;
 //
 // npm ERR! A complete log of this run can be found in:
 // npm ERR!     /Users/bunker/.npm/_logs/2021-01-26T12_29_00_088Z-debug.log
-// OJO: No es necesario instalar los types por que el paquete body-parser ya los contiene.
 //
+// OJO: No es necesario instalar los types por que el paquete body-parser ya los contiene.
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 //npm install cors
 //npm install -D @types/cors
+//https://github.com/expressjs/cors#readme
 app.use(cors({ origin: /^https:\/\/(.*)\.(bunkerdb|eagle-latam)\.com$/ }));
 
+//
 app.use(helmet());
 
-//TODO: Manrdar archivos.
-//
-// |
-// |
-// v
-// app.[get|post|put|delete...|all](PATTERN, HANDLE);
-// app.get('/ping', (req, res) => {});
-// src/index.ts:7:19 - error TS6133: 'req' is declared but its value is never read.
-//  Para evitar este tipo de error en tiempo de compilacion se le agrega una _ adelante de la variable
-app.get('/ping', (_req, res) => {
-  console.log('ROUTE');
-  console.log(res.locals);
+app.get("/ping", (_req: Request, res: Response) => {
   res.status(200).json({
     statusCode: 200,
-    data: { status: 'ok' },
+    data: { status: "ok" },
   });
 });
 
-app.post(
-  '/test',
-  (_req, _res, next) => {
-    console.log('ME LLAMARON');
-    //LOGICA
-    next();
-  },
-  (req, res) => {
-    console.log(req.body);
-    console.log(req.query);
-    res.status(200).json({
-      statusCode: 200,
-      data: req.body,
-    });
-  }
-);
+app.get("/error", (_req, _res) => {
+  throw new Error("Lo SABIA");
+});
 
+//NO ROUTE FOUND
 app.use((_req: Request, _res: Response, next: NextFunction) => {
-  //MW NO FOUNY
   next(createHttpError(404));
+});
+
+//TODO:ERROR HANDLER
+app.use((error: any, _req: Request, res: Response, _next: NextFunction) => {
+  //TODA LA LOGICA DE MANEJO DE ERROR
+  //console.error(error); // ASPIRANTE A LOGGER
+  let msj: any;
+  if (error instanceof Error) {
+    msj = error.message;
+  }
+  res.status(error.status ?? 500).json({ msj });
 });
 
 app.listen(port, () => {
   console.log(
-    ' App is running at http://localhost:%d in %s mode',
+    " App is running at http://localhost:%d in %s mode",
     port,
-    app.get('env')
+    app.get("env")
   );
-  console.log('  Press CTRL-C to stop\n');
+  console.log("  Press CTRL-C to stop\n");
 });
+
+//(APP WEB) -> (HTTP NGIX||APACHE) -> [(php-fpm -=> sbin/php) -> (script)]-> PROCESO
+
+//(APP WEB) -> 80:443 (LB:HA:Proxy (NGIX)) (pm2 || xx)-> 5000(HTTP NODE) -> (script) PROCESO (pid, sock)
