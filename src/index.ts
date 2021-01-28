@@ -5,10 +5,9 @@ import cors from "cors";
 import bodyParser from "body-parser";
 import helmet from "helmet";
 import _ from "lodash";
-
 import dotenv from "dotenv";
 
-//
+//LOAD .env add to process.env {[key: string]: string | undefined;}
 const result = dotenv.config();
 
 if (result.error) {
