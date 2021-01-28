@@ -1,0 +1,27 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DNS")
+}
+
+model Brand {
+  id        Int        @id @default(autoincrement())
+  createdAt DateTime   @default(now())
+  name      String
+  Campaign  Campaign[]
+}
+
+model Campaign {
+  id        Int       @id @default(autoincrement())
+  brandId   Int
+  createdAt DateTime  @default(now())
+  name      String
+  startDate DateTime
+  endDate   DateTime?
+  Brand     Brand     @relation(fields: [brandId], references: [id])
+
+  @@index([brandId], name: "fk_Brand_brandId_id")
+}

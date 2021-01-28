@@ -4,8 +4,42 @@ import compression from "compression";
 import cors from "cors";
 import bodyParser from "body-parser";
 import helmet from "helmet";
-import _ from "lodash";
 import dotenv from "dotenv";
+//import PromiseB from "bluebird";
+import _ from "lodash";
+import { PrismaClient } from "@prisma/client";
+
+//VIA DB EXISTE
+//DEPENDENCIA
+//npm install -g npx --force
+//npm install bluebird
+//npm install -D @types/bluebird
+//npm install -D @prisma/cli
+//STEP 1
+// ->  npx prisma init
+// GENERO prisma/schema.prisma
+//        .env DNS de conexion a DB(MYSQL)
+//STEP 2
+// ->  npx prisma introspect
+//    Genero los modelos en prisma/schema.prisma que existan en la DB
+//STEP 3
+// ->  npx prisma validate
+//    Valido que los modelos obtenido del DB esten correctos
+//STEP 4
+// ->  npm install @prisma/client
+// Installar el CLIENTE (ORM + DBAL)
+// STEP 5
+// -> npx prisma generate
+
+// Environment variables loaded from .env
+// Prisma schema loaded from prisma/schema.prisma
+//
+// ✔ Generated Prisma Client (2.15.0) to ./node_modules/@prisma/client in 111ms
+// You can now start using Prisma Client in your code. Reference: https://pris.ly/d/client
+// ```
+// import { PrismaClient } from '@prisma/client'
+// const prisma = new PrismaClient()
+// ```
 
 //LOAD .env add to process.env {[key: string]: string | undefined;}
 const result = dotenv.config();
@@ -13,6 +47,9 @@ const result = dotenv.config();
 if (result.error) {
   throw result.error;
 }
+
+
+const prisma = new PrismaClient()
 
 _.forIn(
   {
@@ -66,6 +103,27 @@ app.get("/ping", (_req: Request, res: Response) => {
   res.status(200).json({
     statusCode: 200,
     data: { status: "ok" },
+  });
+});
+
+app.get('/brands', async (_req, res) =>{
+  const brands = await prisma.brand.findMany();
+  res.status(200).json({
+    statusCode: 200,
+    data: brands,
+  });
+});
+
+app.get('/brands/:id', async (req, res) =>{
+  const id: number = parseInt(req.params.id ?? "0")
+  const brand = await prisma.brand.findUnique({
+    where: {
+      id: id,
+    }
+  });
+  res.status(200).json({
+    statusCode: 200,
+    data: brand,
   });
 });
 
