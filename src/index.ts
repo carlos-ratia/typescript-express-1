@@ -34,7 +34,7 @@ import { PrismaClient } from "@prisma/client";
 //             on delete cascade
 //     );
 //
-// ADD .env DNS="mysql://root:toor@local.bunkerdb.com:3306/db_test"
+// ADD .env DNS="mysql://USER:PASSWORD@HOST:PORT/DATABASE"
 
 //https://www.prisma.io/docs/getting-started/setup-prisma/start-from-scratch-typescript-mysql
 //DEPENDENCIA
