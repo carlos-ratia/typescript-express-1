@@ -10,6 +10,33 @@ import _ from "lodash";
 import { PrismaClient } from "@prisma/client";
 
 //VIA 1 DB EXISTE
+
+// SQL
+//CREATE DATABASE db_test;
+//
+// create table Brand
+// (
+//     id                         int unsigned auto_increment primary key,
+//     createdAt                    timestamp   default CURRENT_TIMESTAMP not null,
+//     name                       varchar(255)                           not null
+// );
+//
+// create table Campaign
+// (
+//     id                              int unsigned auto_increment primary key,
+//     brandId                        int unsigned                                  not null,
+//     createdAt                         timestamp  default CURRENT_TIMESTAMP not null,
+//     name                            varchar(255)                                  not null,
+//     startDate                      datetime                                      not null,
+//     endDate                        datetime                                      null,
+//     constraint fk_Brand_brandId_id
+//         foreign key (brandId) references Brand (id)
+//             on delete cascade
+//     );
+//
+// ADD .env DNS="mysql://root:toor@local.bunkerdb.com:3306/db_test"
+
+//https://www.prisma.io/docs/getting-started/setup-prisma/start-from-scratch-typescript-mysql
 //DEPENDENCIA
 //npm install -g npx --force
 //npm install bluebird
