@@ -9,7 +9,7 @@ import dotenv from "dotenv";
 import _ from "lodash";
 import { PrismaClient } from "@prisma/client";
 
-//VIA DB EXISTE
+//VIA 1 DB EXISTE
 //DEPENDENCIA
 //npm install -g npx --force
 //npm install bluebird
