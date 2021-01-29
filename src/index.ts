@@ -4,126 +4,59 @@ import compression from "compression";
 import cors from "cors";
 import bodyParser from "body-parser";
 import helmet from "helmet";
-import dotenv from "dotenv";
-//import PromiseB from "bluebird";
+import dotenv, { DotenvConfigOutput } from "dotenv";
 import _ from "lodash";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Brand, Prisma } from "@prisma/client";
 
-//VIA 1 DB EXISTE
-
-// SQL
-//CREATE DATABASE db_test;
-//
-// create table Brand
-// (
-//     id                         int unsigned auto_increment primary key,
-//     createdAt                    timestamp   default CURRENT_TIMESTAMP not null,
-//     name                       varchar(255)                           not null
-// );
-//
-// create table Campaign
-// (
-//     id                              int unsigned auto_increment primary key,
-//     brandId                        int unsigned                                  not null,
-//     createdAt                         timestamp  default CURRENT_TIMESTAMP not null,
-//     name                            varchar(255)                                  not null,
-//     startDate                      datetime                                      not null,
-//     endDate                        datetime                                      null,
-//     constraint fk_Brand_brandId_id
-//         foreign key (brandId) references Brand (id)
-//             on delete cascade
-//     );
-//
-// ADD .env DNS="mysql://USER:PASSWORD@HOST:PORT/DATABASE"
-
-//https://www.prisma.io/docs/getting-started/setup-prisma/start-from-scratch-typescript-mysql
-//DEPENDENCIA
-//npm install -g npx --force
-//npm install bluebird
-//npm install -D @types/bluebird
-//npm install -D @prisma/cli
-//STEP 1
-// ->  npx prisma init
-// GENERO prisma/schema.prisma
-//        .env DNS de conexion a DB(MYSQL)
-//STEP 2
-// ->  npx prisma introspect
-//    Genero los modelos en prisma/schema.prisma que existan en la DB
-//STEP 3
-// ->  npx prisma validate
-//    Valido que los modelos obtenido del DB esten correctos
-//STEP 4
-// ->  npm install @prisma/client
-// Installar el CLIENTE (ORM + DBAL)
-// STEP 5
-// -> npx prisma generate
-
-// Environment variables loaded from .env
-// Prisma schema loaded from prisma/schema.prisma
-//
-// ✔ Generated Prisma Client (2.15.0) to ./node_modules/@prisma/client in 111ms
-// You can now start using Prisma Client in your code. Reference: https://pris.ly/d/client
-// ```
-// import { PrismaClient } from '@prisma/client'
-// const prisma = new PrismaClient()
-// ```
-
-//LOAD .env add to process.env {[key: string]: string | undefined;}
-const result = dotenv.config();
+const result: DotenvConfigOutput = dotenv.config();
 
 if (result.error) {
   throw result.error;
 }
 
-
-const prisma = new PrismaClient()
+//https://www.prisma.io/docs/concepts/components/prisma-client/crud
 
 _.forIn(
   {
     PORT: process.env.PORT,
+    DNS: process.env.DNS,
   },
   (value: string | null | undefined, key: any) => {
-    if (value === undefined || value === null || value === "") {
+    if (value === undefined || value === null || _.isEmpty(value)) {
       console.error(`The ${key} is no define in the .env`);
       process.exit(1);
     }
   }
 );
 
-//npm install express
-//npm install -D @types/express
 const app: Application = express();
 const port: number = parseInt(process.env.PORT ?? "5000");
 
-// npm install compression
-// npm install -D @types/compression
-// https://github.com/expressjs/compression#readme
-app.use(compression());
+const prisma = new PrismaClient({
+  log: [
+    {
+      level: "info",
+      emit: "stdout",
+    },
+    {
+      level: "warn",
+      emit: "stdout",
+    },
+    {
+      level: "query",
+      emit: "stdout",
+    },
+    {
+      level: "error",
+      emit: "stdout",
+    },
+  ],
+});
 
-//npm install body-parse
-//npm install -D @types/body-parse
-//npm ERR! code E404
-// npm ERR! 404 Not Found - GET https://registry.npmjs.org/@types%2fbody-parse - Not found
-// npm ERR! 404
-// npm ERR! 404  '@types/body-parse@latest' is not in the npm registry.
-// npm ERR! 404 You should bug the author to publish it (or use the name yourself!)
-// npm ERR! 404
-// npm ERR! 404 Note that you can also install from a
-// npm ERR! 404 tarball, folder, http url, or git url.
-//
-// npm ERR! A complete log of this run can be found in:
-// npm ERR!     /Users/bunker/.npm/_logs/2021-01-26T12_29_00_088Z-debug.log
-//
-// OJO: No es necesario instalar los types por que el paquete body-parser ya los contiene.
+app.use(compression());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-
-//npm install cors
-//npm install -D @types/cors
-//https://github.com/expressjs/cors#readme
 app.use(cors({ origin: /^https:\/\/(.*)\.(bunkerdb|eagle-latam)\.com$/ }));
-
-//
 app.use(helmet());
 
 app.get("/ping", (_req: Request, res: Response) => {
@@ -133,20 +66,32 @@ app.get("/ping", (_req: Request, res: Response) => {
   });
 });
 
-app.get('/brands', async (_req, res) =>{
-  const brands = await prisma.brand.findMany();
+app.get("/brands", async (_req, res) => {
+  const brands = await prisma.brand.findMany({
+    select: {
+      id: true,
+      name: false,
+      Campaign: true,
+    },
+    orderBy: {
+      id: Prisma.SortOrder.asc,
+    },
+    where: {
+      id: { gte: 2 },
+    },
+  });
   res.status(200).json({
     statusCode: 200,
     data: brands,
   });
 });
 
-app.get('/brands/:id', async (req, res) =>{
-  const id: number = parseInt(req.params.id ?? "0")
-  const brand = await prisma.brand.findUnique({
+app.get("/brands/:id", async (req, res) => {
+  const id: number = parseInt(req.params.id ?? "0");
+  const brand: Brand | null = await prisma.brand.findUnique({
     where: {
       id: id,
-    }
+    },
   });
   res.status(200).json({
     statusCode: 200,
@@ -154,19 +99,34 @@ app.get('/brands/:id', async (req, res) =>{
   });
 });
 
-app.get("/error", (_req, _res) => {
-  throw new Error("Lo SABIA");
+app.post("/brands/", async (req, res) => {
+  const { name, Campaign } = req.body;
+  console.log(Campaign);
+  const brand: Brand = await prisma.brand.create({
+    data: {
+      name: name,
+      Campaign: {
+        create: Campaign.map((c:any) => {
+          return {
+            name: c.name,
+            startDate: new Date(c.startDate),
+          };
+        }),
+      },
+    },
+  });
+  res.status(200).json({
+    statusCode: 200,
+    data: brand,
+  });
 });
 
-//NO ROUTE FOUND
 app.use((_req: Request, _res: Response, next: NextFunction) => {
   next(createHttpError(404));
 });
 
-//TODO:ERROR HANDLER
 app.use((error: any, _req: Request, res: Response, _next: NextFunction) => {
-  //TODA LA LOGICA DE MANEJO DE ERROR
-  //console.error(error); // ASPIRANTE A LOGGER
+  console.error(error);
   let msj: any;
   if (error instanceof Error) {
     msj = error.message;
@@ -182,7 +142,3 @@ app.listen(port, () => {
   );
   console.log("  Press CTRL-C to stop\n");
 });
-
-//(APP WEB) -> (HTTP NGIX||APACHE) -> [(php-fpm -=> sbin/php) -> (script)]-> PROCESO
-
-//(APP WEB) -> 80:443 (LB:HA:Proxy (NGIX)) (pm2 || xx)-> 5000(HTTP NODE) -> (script) PROCESO (pid, sock)

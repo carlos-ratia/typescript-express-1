@@ -9,7 +9,7 @@ datasource db {
 
 model Brand {
   id        Int        @id @default(autoincrement())
-  createdAt DateTime   @default(now())
+  createdAt DateTime?
   name      String
   Campaign  Campaign[]
 }

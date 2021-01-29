@@ -4,9 +4,13 @@
   "description": "Node + ExpressJs + Typescript",
   "main": "index.js",
   "scripts": {
+    "build": "npm run prisma:validate && npm run prisma:generate && npm run build:ts",
     "build:ts": "tsc",
-    "watch:build": "tsc -w",
+    "watch:ts": "tsc -w",
     "watch:serve": "nodemon src/index.ts",
+    "prisma:introspect": "npx prisma introspect",
+    "prisma:generate": "npx prisma generate",
+    "prisma:validate": "npx prisma validate",
     "prettier": "prettier -w ./src/*.ts"
   },
   "repository": {
