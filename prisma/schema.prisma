@@ -4,24 +4,14 @@ generator client {
 
 datasource db {
   provider = "mysql"
-  url      = env("DNS")
+  url      = env("DSN")
 }
 
 model Brand {
-  id        Int        @id @default(autoincrement())
-  createdAt DateTime?
-  name      String
-  Campaign  Campaign[]
+  id   String @id @default(uuid())
+  name String
 }
 
-model Campaign {
-  id        Int       @id @default(autoincrement())
-  brandId   Int
-  createdAt DateTime  @default(now())
-  name      String
-  startDate DateTime
-  endDate   DateTime?
-  Brand     Brand     @relation(fields: [brandId], references: [id])
-
-  @@index([brandId], name: "fk_Brand_brandId_id")
+model SequelizeMeta {
+  name String @id
 }

@@ -19,7 +19,7 @@ if (result.error) {
 _.forIn(
   {
     PORT: process.env.PORT,
-    DNS: process.env.DNS,
+    DSN: process.env.DSN,
   },
   (value: string | null | undefined, key: any) => {
     if (value === undefined || value === null || _.isEmpty(value)) {
@@ -68,16 +68,8 @@ app.get("/ping", (_req: Request, res: Response) => {
 
 app.get("/brands", async (_req, res) => {
   const brands = await prisma.brand.findMany({
-    select: {
-      id: true,
-      name: false,
-      Campaign: true,
-    },
     orderBy: {
       id: Prisma.SortOrder.asc,
-    },
-    where: {
-      id: { gte: 2 },
     },
   });
   res.status(200).json({
@@ -87,7 +79,7 @@ app.get("/brands", async (_req, res) => {
 });
 
 app.get("/brands/:id", async (req, res) => {
-  const id: number = parseInt(req.params.id ?? "0");
+  const id: string = req.params.id ?? "";
   const brand: Brand | null = await prisma.brand.findUnique({
     where: {
       id: id,
@@ -105,14 +97,6 @@ app.post("/brands/", async (req, res) => {
   const brand: Brand = await prisma.brand.create({
     data: {
       name: name,
-      Campaign: {
-        create: Campaign.map((c:any) => {
-          return {
-            name: c.name,
-            startDate: new Date(c.startDate),
-          };
-        }),
-      },
     },
   });
   res.status(200).json({

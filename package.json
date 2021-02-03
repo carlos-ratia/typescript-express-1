@@ -4,14 +4,16 @@
   "description": "Node + ExpressJs + Typescript",
   "main": "index.js",
   "scripts": {
-    "build": "npm run prisma:validate && npm run prisma:generate && npm run build:ts",
+    "build": "npm run db:migration:up && npm run prisma:introspect &&  npm run prisma:validate && npm run prisma:generate && npm run build:ts",
     "build:ts": "tsc",
     "watch:ts": "tsc -w",
+    "db:migration:up": "npx sequelize-cli db:migrate",
+    "db:migration:down": "npx sequelize-cli db:migrate:undo",
     "watch:serve": "nodemon src/index.ts",
     "prisma:introspect": "npx prisma introspect",
     "prisma:generate": "npx prisma generate",
     "prisma:validate": "npx prisma validate",
-    "prettier": "prettier -w ./src/*.ts"
+    "prettier": "prettier --write ."
   },
   "repository": {
     "type": "git",
@@ -32,8 +34,11 @@
     "@types/express": "^4.17.11",
     "@types/http-errors": "^1.8.0",
     "@types/lodash": "^4.14.168",
+    "mysql2": "^2.2.5",
     "nodemon": "^2.0.7",
     "prettier": "^2.2.1",
+    "sequelize": "^6.5.0",
+    "sequelize-cli": "^6.2.0",
     "ts-node": "^9.1.1",
     "typescript": "^4.1.3"
   },
