@@ -16,3 +16,7 @@ npx sequelize-cli init
 4.1 UP
 4.2 DOWN
 5 - Seeders
+
+//PROGRAMACION ORIENTADA POR CAPAS MS
+-> INPUT -> MW1, MW2, MW3 -> ACCION -> Dominio -> Aplicacion -> OUPUT
+APP(ACTIONS,MW) <|> DOMAIN <|> Infra(DB, LOGGER, REDIS....)

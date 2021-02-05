@@ -7,6 +7,8 @@ import helmet from "helmet";
 import dotenv, { DotenvConfigOutput } from "dotenv";
 import _ from "lodash";
 import { PrismaClient, Brand, Prisma } from "@prisma/client";
+import { Ping } from "./Application/Actions/Infrasture/Ping";
+import { Load as LoadBrandById } from "./Application/Actions/ORM/Brand/Load";
 
 const result: DotenvConfigOutput = dotenv.config();
 
@@ -59,12 +61,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors({ origin: /^https:\/\/(.*)\.(bunkerdb|eagle-latam)\.com$/ }));
 app.use(helmet());
 
-app.get("/ping", (_req: Request, res: Response) => {
-  res.status(200).json({
-    statusCode: 200,
-    data: { status: "ok" },
-  });
-});
+app.get("/ping", new Ping().call);
 
 app.get("/brands", async (_req, res) => {
   const brands = await prisma.brand.findMany({
@@ -78,22 +75,10 @@ app.get("/brands", async (_req, res) => {
   });
 });
 
-app.get("/brands/:id", async (req, res) => {
-  const id: string = req.params.id ?? "";
-  const brand: Brand | null = await prisma.brand.findUnique({
-    where: {
-      id: id,
-    },
-  });
-  res.status(200).json({
-    statusCode: 200,
-    data: brand,
-  });
-});
+app.get("/brands/:id", new LoadBrandById().call);
 
 app.post("/brands/", async (req, res) => {
-  const { name, Campaign } = req.body;
-  console.log(Campaign);
+  const { name } = req.body;
   const brand: Brand = await prisma.brand.create({
     data: {
       name: name,

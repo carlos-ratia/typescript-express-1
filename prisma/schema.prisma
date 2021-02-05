@@ -8,10 +8,20 @@ datasource db {
 }
 
 model Brand {
-  id   String @id @default(uuid())
-  name String
+  id       String     @id @default(uuid())
+  name     String
+  Campaign Campaign[]
 }
 
 model SequelizeMeta {
   name String @id
+}
+
+model Campaign {
+  id      String @id
+  name    String
+  brandId String
+  Brand   Brand  @relation(fields: [brandId], references: [id])
+
+  @@index([brandId], name: "fk_brand_brandId_id")
 }
