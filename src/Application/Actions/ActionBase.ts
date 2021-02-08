@@ -17,7 +17,7 @@ export abstract class ActionBase {
         });
       })
       .catch((error) => {
-        //HANDLIG
+        console.error(error);
         next(error);
       });
   };

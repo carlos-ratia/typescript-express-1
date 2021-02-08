@@ -6,9 +6,10 @@ import bodyParser from "body-parser";
 import helmet from "helmet";
 import dotenv, { DotenvConfigOutput } from "dotenv";
 import _ from "lodash";
-import { PrismaClient, Brand, Prisma } from "@prisma/client";
+import { PrismaClient, Prisma } from "@prisma/client";
 import { Ping } from "./Application/Actions/Infrasture/Ping";
 import { Load as LoadBrandById } from "./Application/Actions/ORM/Brand/Load";
+import { Create as CreateBrand } from "./Application/Actions/ORM/Brand/Create";
 
 const result: DotenvConfigOutput = dotenv.config();
 
@@ -76,19 +77,7 @@ app.get("/brands", async (_req, res) => {
 });
 
 app.get("/brands/:id", new LoadBrandById().call);
-
-app.post("/brands/", async (req, res) => {
-  const { name } = req.body;
-  const brand: Brand = await prisma.brand.create({
-    data: {
-      name: name,
-    },
-  });
-  res.status(200).json({
-    statusCode: 200,
-    data: brand,
-  });
-});
+app.post("/brands/", new CreateBrand().call);
 
 app.use((_req: Request, _res: Response, next: NextFunction) => {
   next(createHttpError(404));
