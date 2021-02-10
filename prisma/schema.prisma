@@ -19,7 +19,7 @@ model SequelizeMeta {
 }
 
 model Campaign {
-  id      String @id
+  id      String @id @default(uuid())
   name    String
   brandId String
   Brand   Brand  @relation(fields: [brandId], references: [id])
@@ -30,7 +30,7 @@ model Campaign {
 model BrandWatchDog {
   id        String   @id @default(uuid())
   brandId   String
-  createAt  DateTime @default(now())
+  createAt  DateTime
   operation String
   payload   Json
   Brand     Brand    @relation(fields: [brandId], references: [id])
@@ -38,10 +38,11 @@ model BrandWatchDog {
   @@index([brandId], name: "fk_brand_brandId_id_2")
 }
 
-model Event {
-  eventType = CREATE
-  entityType = CAMPAING,
-  entityID = 111,
-  paylod:
+model Events {
+  id         String   @id @default(uuid())
+  createAt   DateTime @default(now())
+  eventType  String
+  entityType String
+  entityId   String
+  payload    Json
 }
-

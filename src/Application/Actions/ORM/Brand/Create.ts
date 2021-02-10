@@ -11,7 +11,7 @@ export class Create extends ActionBase {
       return name;
     })
       .then((name: string) => {
-        return new BrandRepository().create({name});
+        return new BrandRepository().create({ name });
       })
       .then((brand: Brand) => {
         console.dir(brand);

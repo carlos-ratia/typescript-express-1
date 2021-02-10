@@ -1,10 +1,11 @@
-import { PrismaClient, Brand } from "@prisma/client";
+import { Brand } from "@prisma/client";
 import PromiseB from "bluebird";
 import { RejectOnNotFound } from "../Error/RejectOnNotFound";
+import { DBManager } from "../../Infrastructure/DBManager";
 
 export class BrandRepository {
   public loadById(id: string): PromiseB<Brand> {
-    const db = new PrismaClient();
+    const db = DBManager.getInstance();
     return PromiseB.try(() => {
       return db.brand
         .findUnique({
@@ -22,36 +23,15 @@ export class BrandRepository {
   }
 
   public create(input: { name: string }): PromiseB<Brand> {
-    const db = new PrismaClient();
+    const db = DBManager.getInstance();
     return PromiseB.try(() => {
       return db.brand.create({
         data: {
           name: input.name,
         },
       });
-    })
-      .then((brand: Brand) => {
-        return brand;
-      })
-      .then(async (brand: Brand) => {
-        // EventManager.dispach(event); -> EVENT
-        // DOMINIO (OBSERVER/....)
-        // new DBBrand.crate( ) {}('BRAND', 'CREATE', ....).call()
-        await db.brandWatchDog.create({
-          data: {
-            operation: "CREATE",
-            payload: {
-              input: input,
-              result: brand,
-            },
-            Brand: {
-              connect: {
-                id: brand.id,
-              },
-            },
-          },
-        });
-        return brand;
-      });
+    }).then((brand: Brand) => {
+      return brand;
+    });
   }
 }
