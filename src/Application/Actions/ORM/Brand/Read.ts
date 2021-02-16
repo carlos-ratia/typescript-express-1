@@ -5,19 +5,18 @@ import { BrandRepository } from "../../../../Domain/Repository/BrandRepository";
 import { DBManager } from "../../../../Infrastructure/DBManager";
 import { BrandDTO } from "../../../../Domain/DTO/BrandDTO";
 
-export class Create extends ActionBase {
-  protected doCall(args: { req: Request; res: Response }): PromiseB<BrandDTO> {
+export class Read extends ActionBase {
+  protected doCall(_args: {
+    req: Request;
+    res: Response;
+  }): PromiseB<BrandDTO[]> {
     return PromiseB.try(() => {
-      const { name } = args.req.body;
-      return name;
+      return new BrandRepository({
+        adapter: DBManager.getInstance(),
+      }).read({});
     })
-      .then((name: string) => {
-        return new BrandRepository({
-          adapter: DBManager.getInstance(),
-        }).create({ name });
-      })
-      .then((brand: BrandDTO) => {
-        return brand;
+      .then((brands: BrandDTO[]) => {
+        return brands;
       })
       .catch((error) => {
         throw error;

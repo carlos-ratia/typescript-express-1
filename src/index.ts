@@ -6,10 +6,15 @@ import bodyParser from "body-parser";
 import helmet from "helmet";
 import dotenv, { DotenvConfigOutput } from "dotenv";
 import _ from "lodash";
-import { PrismaClient, Prisma } from "@prisma/client";
 import { Ping } from "./Application/Actions/Infrasture/Ping";
 import { Load as LoadBrandById } from "./Application/Actions/ORM/Brand/Load";
 import { Create as CreateBrand } from "./Application/Actions/ORM/Brand/Create";
+import { Read as ReadBrand } from "./Application/Actions/ORM/Brand/Read";
+import { EventManager } from "./Domain/Event/EventManager";
+import { EVENT_ORM_BRAND_CREATE } from "./Domain/Repository/BrandRepository";
+import { EventDTO } from "./Domain/DTO/EventDTO";
+import PromiseB from "bluebird";
+import { DBManager } from "./Infrastructure/DBManager";
 
 const result: DotenvConfigOutput = dotenv.config();
 
@@ -35,25 +40,45 @@ _.forIn(
 const app: Application = express();
 const port: number = parseInt(process.env.PORT ?? "5000");
 
-const prisma = new PrismaClient({
-  log: [
-    {
-      level: "info",
-      emit: "stdout",
+//REGISTRAR
+EventManager.getInstance().register({
+  eventListener: {
+    eventId: EVENT_ORM_BRAND_CREATE,
+    listener: (args: EventDTO): PromiseB<void> => {
+      return PromiseB.try(() => {
+        console.log(">>>>>EVENTO1");
+      })
+        .then(() => {
+          return DBManager.getInstance().events.create({
+            data: {
+              eventType: "CREATE",
+              entityType: "BRAND",
+              entityId: args.payload.after.id,
+              payload: args.payload,
+            },
+          });
+        })
+        .then((events) => {
+          console.dir(events);
+        })
+        .then(() => {
+          console.log("<<<<<EVENTO1");
+        });
     },
-    {
-      level: "warn",
-      emit: "stdout",
+  },
+});
+
+EventManager.getInstance().register({
+  eventListener: {
+    eventId: EVENT_ORM_BRAND_CREATE,
+    listener: (args: EventDTO): PromiseB<void> => {
+      return PromiseB.try(() => {
+        console.log(">>>>>EVENTO2");
+        console.dir(args);
+        console.log("<<<<<EVENTO2");
+      });
     },
-    {
-      level: "query",
-      emit: "stdout",
-    },
-    {
-      level: "error",
-      emit: "stdout",
-    },
-  ],
+  },
 });
 
 app.use(compression());
@@ -63,19 +88,7 @@ app.use(cors({ origin: /^https:\/\/(.*)\.(bunkerdb|eagle-latam)\.com$/ }));
 app.use(helmet());
 
 app.get("/ping", new Ping().call);
-
-app.get("/brands", async (_req, res) => {
-  const brands = await prisma.brand.findMany({
-    orderBy: {
-      id: Prisma.SortOrder.asc,
-    },
-  });
-  res.status(200).json({
-    statusCode: 200,
-    data: brands,
-  });
-});
-
+app.get("/brands", new ReadBrand().call);
 app.get("/brands/:id", new LoadBrandById().call);
 app.post("/brands/", new CreateBrand().call);
 

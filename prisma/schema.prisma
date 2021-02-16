@@ -8,10 +8,9 @@ datasource db {
 }
 
 model Brand {
-  id            String          @id @default(uuid())
-  name          String
-  BrandWatchDog BrandWatchDog[]
-  Campaign      Campaign[]
+  id       String     @id @default(uuid())
+  name     String
+  Campaign Campaign[]
 }
 
 model SequelizeMeta {
@@ -25,17 +24,6 @@ model Campaign {
   Brand   Brand  @relation(fields: [brandId], references: [id])
 
   @@index([brandId], name: "fk_brand_brandId_id")
-}
-
-model BrandWatchDog {
-  id        String   @id @default(uuid())
-  brandId   String
-  createAt  DateTime
-  operation String
-  payload   Json
-  Brand     Brand    @relation(fields: [brandId], references: [id])
-
-  @@index([brandId], name: "fk_brand_brandId_id_2")
 }
 
 model Events {
