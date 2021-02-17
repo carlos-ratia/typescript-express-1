@@ -5,7 +5,7 @@ import PromiseB from "bluebird";
 
 export interface IEventManager {
   emit(args: { eventDTO: EventDTO }): boolean;
-  register(args: { eventListener: EventListenersDTO }): any;
+  on(args: { eventListener: EventListenersDTO }): this;
 }
 
 export class EventManager implements IEventManager {
@@ -36,13 +36,14 @@ export class EventManager implements IEventManager {
     return this.emitter.emit(args.eventDTO.eventId, args.eventDTO);
   }
 
-  register(args: { eventListener: EventListenersDTO }): any {
-    return this.emitter.on(args.eventListener.eventId, async (_args: any) => {
+  on(args: { eventListener: EventListenersDTO }): this {
+    this.emitter.on(args.eventListener.eventId, async (_args: any) => {
       await PromiseB.resolve(
         args.eventListener.listener(_args as EventDTO)
       ).catch((error) => {
         console.error(error);
       });
     });
+    return this;
   }
 }

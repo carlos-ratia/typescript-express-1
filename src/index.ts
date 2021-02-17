@@ -41,7 +41,7 @@ const app: Application = express();
 const port: number = parseInt(process.env.PORT ?? "5000");
 
 //REGISTRAR
-EventManager.getInstance().register({
+EventManager.getInstance().on({
   eventListener: {
     eventId: EVENT_ORM_BRAND_CREATE,
     listener: (args: EventDTO): PromiseB<void> => {
@@ -68,7 +68,7 @@ EventManager.getInstance().register({
   },
 });
 
-EventManager.getInstance().register({
+EventManager.getInstance().on({
   eventListener: {
     eventId: EVENT_ORM_BRAND_CREATE,
     listener: (args: EventDTO): PromiseB<void> => {
